@@ -1,0 +1,407 @@
+#:import F kivy.factory.Factory
+#:import ListAdapter kivy.adapters.listadapter.ListAdapter
+#:import sla kivy.adapters.simplelistadapter
+#:import label kivy.uix.label
+
+
+<Main>:
+    #id:     _main
+
+    AnchorLayout:
+        anchor_x:   'left'
+        anchor_y:   'top'
+        canvas:
+            Color:
+                rgb: [0.1,0.4,0.7]
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+
+        GeneralOptions:
+            id:         _general_menu
+            height: 250
+            width:  420
+            size_hint: None, None
+
+    AnchorLayout:
+        anchor_x:   'center'
+        anchor_y:   'top'
+
+
+        Mem_info:
+            id:     _mem_info
+            size_hint: None, None
+
+    AnchorLayout:
+        anchor_x:   'left'
+        anchor_y:   'bottom'
+
+        Button:
+            text:   'Сервисное меню'
+            id:     _service_menu_button
+            size:       (200, 30)
+            size_hint:  (None, None)
+            on_press:   F.Service_menu().open()
+
+    AnchorLayout:
+        anchor_x:   'left'
+        anchor_y:   'center'
+
+
+
+        BoxLayout:
+            orientation:    'vertical'
+            size:   (300, 150)
+            size_hint: (None,None)
+            Label:
+                text:   'Питание'
+                size_hint: (1,0.25)
+            BoxLayout:
+                orientation:    'horizontal'
+                #size:   (300, 100)
+                size_hint: (1,0.2)
+                Label:
+                    text:   'I канал'
+                Label:
+                    text:   'II канал'
+                Label:
+                    text:   'III канал'
+
+            BoxLayout:
+                orientation:    'horizontal'
+                #size:   (300, 100)
+                size_hint: (1,0.25)
+                ToggleButton:
+                    id:     _tb_0_1
+                    size:       (100, 30)
+                    size_hint:  (None, None)
+                    text:   '+10 %'
+                    disabled: True if _tb_1_1.state == 'down' else False
+                ToggleButton:
+                    id:     _tb_0_2
+                    text:   '+10 %'
+                    size:       (100, 30)
+                    size_hint:  (None, None)
+                    disabled: True if _tb_1_2.state == 'down' else False
+                ToggleButton:
+                    id:     _tb_0_3
+                    text:   '+10 %'
+                    size:       (100, 30)
+                    size_hint:  (None, None)
+                    disabled: True if _tb_1_3.state == 'down' else False
+
+            BoxLayout:
+                orientation:    'horizontal'
+                #size:   (300, 100)
+                size_hint: (1,0.25)
+                Label:
+                    text:   '0 В'
+                Label:
+                    text:   '0 В'
+                Label:
+                    text:   '0 В'
+
+            BoxLayout:
+                orientation:    'horizontal'
+                #size:   (300, 100)
+                size_hint: (1,0.25)
+                ToggleButton:
+                    id:     _tb_1_1
+                    size:       (100, 30)
+                    size_hint:  (None, None)
+                    text:   '-10 %'
+                    disabled: True if _tb_0_1.state == 'down' else False
+                ToggleButton:
+                    id:     _tb_1_2
+                    text:   '-10 %'
+                    size:       (100, 30)
+                    size_hint:  (None, None)
+                    disabled: True if _tb_0_2.state == 'down' else False
+                ToggleButton:
+                    id:     _tb_1_3
+                    text:   '-10 %'
+                    size:       (100, 30)
+                    size_hint:  (None, None)
+                    disabled: True if _tb_0_3.state == 'down' else False
+
+
+
+
+
+<Service_menu@Popup>
+    id:        serv_memu
+    title:     "Сервисное меню"
+    size:       (550, 250)
+    size_hint : (None,None)
+
+
+    BoxLayout:
+        orientation:    'vertical'
+        size:       (520, 200)
+        size_hint:  (None, 1)
+
+        Button:
+            text:   'Стереть память'
+            id:     _erase_mem
+            size:       (150, 30)
+            size_hint:  (None, None)
+            on_press:   app.erase_mem()
+
+
+        BoxLayout:
+            orientation:    'horizontal'
+            size:       (120, 100)
+            size_hint:  (1, 1)
+
+            Label:
+                text:   'Адрес памяти'
+                size_hint:  (0.3, 0.8)
+
+            TextInput:
+                id: _serv_adr_pam
+                size_hint:  (0.3, 0.8)
+                text: app.serv_adr
+                input_filter: lambda text, from_undo: text[:6 - len(self.text)]
+                on_text:    app.serv_adr = app.filter_serv_adr(self.text)
+
+
+        BoxLayout:
+            orientation:    'horizontal'
+            size:       (220, 300)
+
+            Label:
+                text:   '      Данные в пямять'
+                size_hint:  (0.3, 0.8)
+
+            TextInput:
+                id: _serv_data_pam
+                size_hint:  (0.3, 0.8)
+                text: app.serv_data
+                input_filter:  lambda text, from_undo: text[:2 - len(self.text)]
+                on_text:    app.serv_data = app.filter_serv_data(self.text)
+        Button:
+            text:   'Записать ячейку'
+            id:     _write_piece_data
+            size:       (150, 30)
+            size_hint:  (None, None)
+            on_press:   app.write_serv_data()
+            on_press:   root.ids.data_list.refresh_from_data()
+            #on_press:   serv_memu.dismiss()
+            #on_press:   F.Service_menu().open()
+
+
+        BoxLayout:
+            orientation:    'horizontal'
+            size:       (220, 300)
+
+            Label:
+                text:   '           Полученные данные'
+                size_hint:  (0.3, 0.8)
+
+            RecycleView:
+                id: data_list
+                size_hint:  (0.3, 0.65)
+                scroll_type: ['bars', 'content']
+                scroll_wheel_distance: dp(114)
+                bar_width: dp(10)
+                viewclass:  'Label_List'
+                data:       app.serv_menu_data
+
+                RecycleBoxLayout:
+                    default_size: None, dp(20)
+                    default_size_hint: None, None
+                    size_hint_y: None
+                    height: self.minimum_height
+                    orientation: 'vertical'
+                    spacing: dp(2)
+
+
+
+<GeneralOptions@BoxLayout>:
+    orientation:    'vertical'
+
+
+    BoxLayout:
+        orientation:    'horizontal'
+        size:       (220, 300)
+        Label:
+            text:   '       '
+        Label:
+            text:   'битный'
+        Label:
+            text:   'байтный'
+
+
+    BoxLayout:
+        orientation:    'horizontal'
+        size:       (220, 300)
+
+        Label:
+            text:   '        Выбор интерфейса: '
+
+        CheckBox:
+            group: 'interface'
+            id :    _posled
+        CheckBox:
+            group: 'interface'
+            id :    _parall
+            active: True
+
+    BoxLayout:
+        orientation:    'horizontal'
+        size:       (220, 300)
+
+        Label:
+            text:   ' Выбор ВУО:               '
+
+        TextInput:
+            id: _vuo
+            size_hint:  (0.5, 1)
+            text: "1"
+            input_filter: 'int'
+
+        Label:
+            text:   'от 0 до 31'
+
+    BoxLayout:
+        orientation:    'horizontal'
+        size:       (220, 300)
+
+        Label:
+            text:   ' Выбор абонента:     '
+
+        TextInput:
+            id: _abonent
+            size_hint:  (0.5, 1)
+            text: "1"
+            input_filter: 'int'
+
+        Label:
+            text:   'от 0 до 255'
+
+    Label:
+        text:   ' '
+    Button:
+        text:   'Прочитать'
+        size:       (200, 30)
+        size_hint:  (None, None)
+        on_press:   app.read_mem()
+    Button:
+        text:   'Смотреть циклично'
+        id:     cycle_view_
+        size:       (200, 30)
+        size_hint:  (None, None)
+        on_press:   app.go_potok()
+    Label:
+        text:   'Для выхода из\nцикличекого режима\nнажать "End"'
+        size:       (200, 60)
+        size_hint:  (None, None)
+<TextInput_List@BoxLayout>:
+    text: '0'
+    id: _text_
+    TextInput:
+        padding: (8, 1, 2, 1)
+        halign: 'middle'
+        size_hint_x: .9
+        multiline: 'False'
+        input_filter: 'int'
+        text:       root.text
+        on_text:    root.a_number = self.text
+        #on_text: if self.focus: app.data_mem_read[root.row_id]['text'] = self.text
+        #on_text: if self.focus: app.write_pam()
+        #on_text: if self.focus: app.read_pam()
+
+<Label_List@BoxLayout>:
+    a_number: '0'
+    Label:
+        text: root.a_number
+        font_size: '20dp'
+
+
+
+<Mem_info@BoxLayout>
+    size:       (500, 900)
+    size_hint : (None,None)
+    orientation: "vertical"
+
+    BoxLayout:
+        orientation: "vertical"
+        size:       (500, 800)
+        size_hint:  (None, None)
+
+        BoxLayout:
+            orientation: "horizontal"
+            size:       (450, 820)
+            size_hint:  (None, None)
+
+            RecycleView:
+                id: label_list_adreses
+                scroll_type: ['bars', 'content']
+                scroll_wheel_distance: dp(114)
+                bar_width: dp(10)
+                viewclass:  'Label_List'
+                data:       app.adress_pam_1
+
+                RecycleBoxLayout:
+                    default_size: None, dp(20)
+                    default_size_hint: None, None
+                    size_hint_y: None
+                    height: self.minimum_height
+                    orientation: 'vertical'
+                    spacing: dp(2)
+
+            RecycleView:
+                id: memory_data_1
+                scroll_type: ['bars', 'content']
+                scroll_wheel_distance: dp(114)
+                bar_width: dp(10)
+                viewclass:  'TextInput_List'
+                data:       app.data_mem_read_1
+
+                RecycleBoxLayout:
+                    id: boxxxx
+                    default_size: None, dp(20)
+                    default_size_hint: None, None
+                    size_hint_y: None
+                    height: self.minimum_height
+                    orientation: 'vertical'
+                    spacing: dp(2)
+
+            RecycleView:
+                id: label_list_adreses_2
+                scroll_type: ['bars', 'content']
+                scroll_wheel_distance: dp(114)
+                bar_width: dp(10)
+                viewclass:  'Label_List'
+                data:       app.adress_pam_2
+
+                RecycleBoxLayout:
+                    default_size: None, dp(20)
+                    default_size_hint: None, None
+                    size_hint_y: None
+                    height: self.minimum_height
+                    orientation: 'vertical'
+                    spacing: dp(2)
+
+            RecycleView:
+                id: memory_data_2
+                scroll_type: ['bars', 'content']
+                scroll_wheel_distance: dp(114)
+                bar_width: dp(10)
+                viewclass:  'TextInput_List'
+                data:       app.data_mem_read_2
+
+                RecycleBoxLayout:
+                    id: boxxxx
+                    default_size: None, dp(20)
+                    default_size_hint: None, None
+                    size_hint_y: None
+                    height: self.minimum_height
+                    orientation: 'vertical'
+                    spacing: dp(2)
+
+
+
+
+
